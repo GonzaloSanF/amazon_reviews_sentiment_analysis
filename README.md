@@ -2,8 +2,6 @@
 
 **Autores:** Gonzalo Sánchez, Javier Muñoz 
 
-**Asignatura:** Cloud y Big Data
-
 ---
 
 ## 📄 1. Descripción del problema

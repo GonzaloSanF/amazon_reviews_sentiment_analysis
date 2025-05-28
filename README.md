@@ -41,6 +41,7 @@ El objetivo es procesar masivamente reseñas de clientes de Amazon para extraer 
 ├── results/             # Salidas de ejecución en GCS
 ├── README.md            # Documentación
 └── requirements.txt     # Dependencias (pyspark)
+
 ```markdown
 
 ---

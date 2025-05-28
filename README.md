@@ -1,6 +1,7 @@
 # Proyecto Big Data en Google Cloud Platform: Análisis de Sentimiento de Amazon
 
 **Autores:** Gonzalo Sánchez, Javier Muñoz 
+
 **Asignatura:** Cloud y Big Data
 
 ---

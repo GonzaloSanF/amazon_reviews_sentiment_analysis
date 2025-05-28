@@ -1,41 +1,70 @@
-# Proyecto Big Data en la Nube: Análisis de Sentimiento de Amazon
+# Proyecto Big Data en Google Cloud Platform: Análisis de Sentimiento de Amazon
 
-**Autores:** Nombre1, Nombre2  
-**Fecha:** Mayo 2025
+**Autores:** Gonzalo Sánchez, Javier Muñoz 
+**Asignatura:** Cloud y Big Data
 
 ---
 
 ## 📄 1. Descripción del problema
 El proyecto aborda la necesidad de analizar masivamente opiniones de clientes de Amazon para extraer información estructurada a partir de grandes volúmenes de texto. El dataset contiene millones de reseñas de productos con etiquetas de polaridad (positiva o negativa).
+
 La idea principal es implementar una solución escalable en la nube capaz de:
-Contar cuántas reseñas son positivas vs negativas.
-Determinar las palabras más frecuentes en los textos.
-Calcular estadísticas como la longitud media de los comentarios según el sentimiento.
+
+- Contar cuántas reseñas son positivas vs negativas.
+- Determinar las palabras más frecuentes en los textos.
+- Calcular estadísticas como la longitud media de los comentarios según el sentimiento.
 
 Todo esto se realiza usando Apache Spark y Google Cloud Platform (GCP), simulando un escenario real de procesamiento batch sobre Big Data.
 
 ---
 
 ## 🌐 2. Necesidad de Big Data y Cloud
-- **Volumen**: Más de 3.6 millones de reseñas (≥1 GB de texto), imposible de procesar en un único servidor con eficiencia.  
-- **Velocidad**: Spark in-memory y paralelismo en clúster acelera el análisis batch.  
-- **Elasticidad**: Dataproc en GCP permite escalar nodos/vCPUs bajo demanda y pagar sólo por uso.
+Este análisis justifica plenamente el uso de tecnologías Big Data por varios factores:
+
+- **Volumen**: El dataset supera 1 GB y contiene millones de textos, lo que impide un procesamiento eficiente en local o con scripts tradicionales.
+- **Velocidad**: Los datos incluyen texto libre (ruidoso), etiquetas, puntuaciones y metadatos. Necesitamos preprocesamiento distribuido.
+- **Velocidad y paralelismo**: Spark ejecuta tareas en paralelo en memoria, permitiendo tiempos de respuesta razonables.
+- **Elasticidad y coste**: GCP ofrece escalabilidad horizontal automática (número de nodos), pago por uso, y servicios gestionados como Dataproc para orquestar Spark sin configurar clústeres manualmente.
+
+Sin cloud ni Big Data, ejecutar estos análisis tardaría horas o fallaría por falta de memoria.
 
 ---
 
 ## 🗂️ 3. Descripción de los datos
-- **Origen**: Amazon Reviews Polarity Dataset de Xiang Zhang et al. (NIPS 2015).  
-- **Contenido**: Reseñas etiquetadas como negativas (clase 1) o positivas (clase 2).  
-- **Formato**: CSV con tres columnas (`label`, `title`, `text`), escapado con comillas dobles y salto de línea `\n`.  
-- **Tamaño**: > 1 GB en total (1 800 000 ejemplos por clase en `train.csv`; 200 000 por clase en `test.csv`).
+El conjunto de datos utilizado es el Amazon Reviews Polarity Dataset, construido por Xiang Zhang a partir de los datos brutos de reseñas de Amazon entre 1995 y 2013.
+- **Origen**: Disponible públicamente para tareas de clasificación de texto.
+- **Tamaño**: ~3.6 millones de reseñas en `train.csv`, ocupando más de 1 GB comprimido.
+- **Formato**: CSV con tres campos por línea:
+  `label` (1 = negativo, 2 = positivo)
+  `title` (breve título del comentario)
+  `text` (contenido principal de la reseña)
+
+Preprocesamiento:
+Las líneas están escapadas con comillas dobles y saltos de línea codificados como `\n`.
+No hay cabecera. El procesamiento debe inferir el esquema y limpiar caracteres especiales.
+
+Este volumen y formato lo hacen ideal para una prueba de procesamiento distribuido.
 
 ---
 
 ## 🏗️ 4. Descripción de la aplicación, modelo y plataforma
-- **Aplicación**: Tres scripts PySpark independientes (`.py`) para cada análisis.  
-- **Modelo de programación**: Spark DataFrames (lectura CSV, transformaciones `groupBy`, `explode`, `agg`).  
-- **Plataforma**: Google Cloud Dataproc (clúster gestionado de Spark/Hadoop).  
-- **Infraestructura**: Nodos maestro/worker con 4–8 vCPUs, discos SSD, integración con Cloud Storage.
+El proyecto se compone de tres scripts PySpark independientes que se ejecutan sobre un clúster Dataproc:
+- **Scripts**:
+`sentiment_count.py`: cuenta reseñas positivas y negativas.
+`word_frequency.py`: extrae las 20 palabras más frecuentes.
+`review_length.py`: calcula la longitud media de reseñas por clase.
+
+- **Modelo de programación**:
+Spark DataFrames, expresiones SQL y funciones integradas (`explode`, `regexp_replace`, `groupBy`, etc.).
+Escritura de resultados en CSV sobre Google Cloud Storage (`gs://`).
+
+- **Infraestructura utilizada**:
+Clúster Dataproc con configuración escalable (2 y 4 nodos en pruebas).
+Máquinas e2-standard-4 (4 vCPUs, 16 GB RAM) por nodo.
+Datos y scripts almacenados en un bucket de Cloud Storage (`project-amazon-reviews`).
+Se usa Cloud Shell para lanzar los jobs vía `gcloud dataproc jobs submit`.
+
+La infraestructura permite una implementación eficiente y reproducible del procesamiento completo.
 
 ---
 
@@ -45,8 +74,7 @@ Todo esto se realiza usando Apache Spark y Google Cloud Platform (GCP), simuland
 ├── data/                # CSV de entrenamiento y prueba
 ├── scripts/             # sentiment_count.py, word_frequency.py, review_length.py
 ├── results/             # Salidas de ejecución en GCS
-├── README.md            # Documentación
-└── requirements.txt     # Dependencias (pyspark)
+└── README.md            # Documentación
  ``` 
 
 ---
@@ -67,36 +95,34 @@ Todo esto se realiza usando Apache Spark y Google Cloud Platform (GCP), simuland
 
 3. **Ejecutar scripts**
    ```bash
-   gcloud dataproc jobs submit pyspark scripts/sentiment_count.py \
+   gcloud dataproc jobs submit sentiment_count.py \
    --cluster=mycluster --region=europe-southwest1 \
    -- $BUCKET/data/train.csv $BUCKET/results/sentiment_count
 
-   gcloud dataproc jobs submit pyspark scripts/word_frequency.py \
+   gcloud dataproc jobs submit word_frequency.py \
    --cluster=mycluster --region=europe-southwest1 \
    -- $BUCKET/data/train.csv $BUCKET/results/word_frequency
 
-   gcloud dataproc jobs submit pyspark scripts/review_length.py \
+   gcloud dataproc jobs submit review_length.py \
    --cluster=mycluster --region=europe-southwest1 \
    -- $BUCKET/data/train.csv $BUCKET/results/review_length
 
 4. **Consultar resultados**
    ```bash
    gsutil ls $BUCKET/results/
-   gsutil cat $BUCKET/results/sentiment_count/part-00000-* | head
+   gsutil cat $BUCKET/results/sentiment_count/
 
 ---
 
 ## 📈 7. Evaluación de rendimiento
 - **2 nodos (8 vCPUs)**  
-  - sentiment_count: 110 s  
-  - word_frequency: 140 s  
-  - review_length: 70 s  
-  - Speed-up: 1.8×
+  - sentiment_count: 67.9 s  
+  - word_frequency: 131 s  
+  - review_length: 59 s  
 - **4 nodos (16 vCPUs)**  
-  - sentiment_count: 60 s  
-  - word_frequency: 75 s  
-  - review_length: 35 s  
-  - Speed-up: 3.3×
+  - sentiment_count: 58.8 s  
+  - word_frequency: 96 s  
+  - review_length: 56 s 
 
 ---
 

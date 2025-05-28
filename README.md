@@ -6,7 +6,13 @@
 ---
 
 ## 📄 1. Descripción del problema
-El objetivo es procesar masivamente reseñas de clientes de Amazon para extraer métricas clave de sentimiento y texto (conteo de reseñas positivas vs negativas, frecuencia de palabras y longitud media de reseñas) usando Apache Spark en Google Cloud Platform (GCP).
+El proyecto aborda la necesidad de analizar masivamente opiniones de clientes de Amazon para extraer información estructurada a partir de grandes volúmenes de texto. El dataset contiene millones de reseñas de productos con etiquetas de polaridad (positiva o negativa).
+La idea principal es implementar una solución escalable en la nube capaz de:
+Contar cuántas reseñas son positivas vs negativas.
+Determinar las palabras más frecuentes en los textos.
+Calcular estadísticas como la longitud media de los comentarios según el sentimiento.
+
+Todo esto se realiza usando Apache Spark y Google Cloud Platform (GCP), simulando un escenario real de procesamiento batch sobre Big Data.
 
 ---
 
@@ -81,11 +87,6 @@ El objetivo es procesar masivamente reseñas de clientes de Amazon para extraer 
 ---
 
 ## 📈 7. Evaluación de rendimiento
-- **1 nodo (4 vCPUs)**  
-  - sentiment_count: 200 s  
-  - word_frequency: 260 s  
-  - review_length: 120 s  
-  - Speed-up: 1×
 - **2 nodos (8 vCPUs)**  
   - sentiment_count: 110 s  
   - word_frequency: 140 s  
@@ -101,26 +102,20 @@ El objetivo es procesar masivamente reseñas de clientes de Amazon para extraer 
 
 ## 🚀 8. Características avanzadas
 - Limpieza de texto con `regexp_replace` para eliminar caracteres no alfabéticos.  
-- Posible extensión con **Spark NLP** (stemming, lematización, stopwords).  
 - Ajuste de particiones (`repartition`/`coalesce`) y uso de `cache()` para mitigar I/O intensivo.  
 - Broadcast variables para compartir pequeñas tablas auxiliares.
 
 ---
 
 ## 📝 9. Conclusiones
-- Se procesaron > 1 GB de datos de reseñas eficazmente con Spark + Dataproc.  
+- Se procesaron 1,5 GB de datos de reseñas eficazmente con Spark + Dataproc.  
 - La escalabilidad mostró speed-ups de hasta 3.3× al duplicar vCPUs.  
 - La orquestación on-demand de clústeres ahorra costes (_pay-per-use_).  
-- **Futuras mejoras**:  
-  - Usar formato columnar (Parquet) para acelerar lecturas.  
-  - Implementar pipelines en Airflow/Composer.  
-  - Integrar modelos de ML para análisis de sentimiento más fino.
 
 ---
 
 ## 📚 10. Referencias
-1. Zhang, X. et al., _Character-level Convolutional Networks for Text Classification_ (NIPS 2015).  
-2. Google Cloud Dataproc Documentation: https://cloud.google.com/dataproc  
-3. Amazon Polarity Dataset: https://github.com/harvardnlp/amazon-polarity  
+1. Google Cloud Dataproc Documentation: https://cloud.google.com/dataproc  
+2. Amazon Polarity Dataset: https://www.kaggle.com/datasets/kritanjalijain/amazon-reviews
 
 

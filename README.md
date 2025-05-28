@@ -79,20 +79,15 @@ La infraestructura permite una implementación eficiente y reproducible del proc
 ---
 
 ## 🚀 6. Uso
-1. **Configurar variables**  
-   ```bash
-   export PROJECT=<tu-proyecto>
-   gcloud config set project $PROJECT
-   export BUCKET=gs://project-amazon-reviews
 
-2. **Crear clúster dataproc**
+1. **Crear clúster dataproc**
    ```bash
    gcloud dataproc clusters create mycluster --region=europe-southwest1 \
    --master-machine-type=e2-standard-4 --master-boot-disk-size=50 \
    --worker-machine-type=e2-standard-4 --worker-boot-disk-size=50 \
    --enable-component-gateway
 
-3. **Ejecutar scripts**
+2. **Ejecutar scripts**
    ```bash
    gcloud dataproc jobs submit sentiment_count.py \
    --cluster=mycluster --region=europe-southwest1 \
@@ -106,7 +101,7 @@ La infraestructura permite una implementación eficiente y reproducible del proc
    --cluster=mycluster --region=europe-southwest1 \
    -- $BUCKET/data/train.csv $BUCKET/results/review_length
 
-4. **Consultar resultados**
+3. **Consultar resultados**
    ```bash
    gsutil ls $BUCKET/results/
    gsutil cat $BUCKET/results/sentiment_count/
